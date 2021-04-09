@@ -3,7 +3,13 @@ require "json"
 require "twitch-api"
 
 class UsersController < ApplicationController
-  def new
+
+  def index
+    @users = User.all
+    render json: @users
+  end
+
+  def create
     session_code = params[:code]
     response = RestClient.post("https://id.twitch.tv/oauth2/token", { :client_id => "#{ENV["CLIENT_ID"]}", :client_secret => "#{ENV["CLIENT_SECRET"]}",
                                                                       :code => session_code, :grant_type => "authorization_code", :redirect_uri => "/" })
@@ -13,12 +19,11 @@ class UsersController < ApplicationController
     user = client.get_users(:access_token => access_token).data.first
     @profile_data = { :image => user.profile_image_url, :name => user.display_name, :twitch_id => user.id }
     if User.find_by(@profile_data) == nil
-      @user = User.new(@profile_data)
-      @user.save
-      redirect_to profile_path(@user)
+      @user = User.create(@profile_data)
+      redirect_to user_path(@user)
     else
       @user = User.find_by(@profile_data)
-      redirect_to profile_path(@user)
+      redirect_to user_path(@user)
     end
     @profile_data = session[:profile_data] 
   end

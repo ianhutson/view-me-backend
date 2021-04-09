@@ -1,18 +1,24 @@
-require "jwt"
-
-class ApplicationController < ActionController::Base
-  before_action :authenticate_request
-  attr_reader :current_user
-
-  private
-
-  def current_user
-    return unless session[:user_id]
-    @current_user ||= User.find(session[:user_id])
-  end
-
+class ApplicationController < ActionController::API  
   def logged_in?
     !!current_user
   end
 
+  def current_user
+    return @current_user if @current_user
+    if auth_present?
+      uid = Auth.decode_uid(read_token_from_request)
+      @current_user = User.find_by({uid: uid})
+      return @current_user if @current_user
+    end
+  end
+  
+private
+  def read_token_from_request
+    token = request.env["HTTP_AUTHORIZATION"]
+                   .scan(/Bearer: (.*)$/).flatten.last
+  end
+  def auth_present?
+    !!request.env.fetch("HTTP_AUTHORIZATION", "")
+             .scan(/Bearer/).flatten.first
+  end
 end
