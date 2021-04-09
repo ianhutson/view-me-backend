@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: 
+  auction: 
+  amount: 1
+  time: 2021-04-09 18:09:59
+
+two:
+  user: 
+  auction: 
+  amount: 1
+  time: 2021-04-09 18:09:59
