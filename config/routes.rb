@@ -2,5 +2,8 @@ Rails.application.routes.draw do
   resources :auctions
   resources :bids
   resources :users
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  get '/login', to: 'sessions#new'
+  post '/login', to: 'sessions#create'
+  delete '/sign_out', to: 'sessions#destroy'
+  get '/auth/:provider/callback', to: 'sessions#create'
 end

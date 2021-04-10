@@ -2,7 +2,7 @@ source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "2.6.1"
-
+gem 'omniauth-twitch'
 gem "rails", "~> 6.0.2", ">= 6.0.2.1"
 gem "sqlite3", "~> 1.4"
 gem "ostruct"
@@ -12,8 +12,8 @@ gem "webpacker"
 gem "turbolinks", "~> 5"
 gem "jbuilder", "~> 2.7"
 gem "rename"
-gem "devise"
 gem "jwt"
+gem "rack-cors"
 gem "json"
 gem "simple_command"
 gem "whenever"
