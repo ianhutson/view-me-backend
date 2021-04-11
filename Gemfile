@@ -13,6 +13,7 @@ gem "turbolinks", "~> 5"
 gem "jbuilder", "~> 2.7"
 gem "rename"
 gem "jwt"
+gem 'fast_jsonapi'
 gem "rack-cors"
 gem "json"
 gem "simple_command"
