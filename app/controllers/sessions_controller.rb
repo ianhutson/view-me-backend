@@ -9,16 +9,18 @@ class SessionsController < ApplicationController
   end
   
   def create
-    puts "yo"
-    puts "#{ENV["id"]}"
-    puts "yo"
     session_code = params[:code]
     response = RestClient.post("https://id.twitch.tv/oauth2/token", { :client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}",
-                                                                      :code => session_code, :grant_type => "authorization_code", :redirect_uri => "auth/twitch/callback" })
+    :code => session_code, :grant_type => "client_credentials", :redirect_uri => "http://localhost:3000" })
     access_token = JSON.parse(response)["access_token"]
     session[:token] = access_token
-    client = Twitch::Client.new(:access_token => session[:token], :with_raw => true)
-    user = client.get_users(:access_token => access_token).data.first
+
+    client = Twitch::Client.new( client_id: "#{ENV["id"]}",
+    client_secret: "#{ENV["secret"]}",
+    token_type: :user, :access_token => session[:token], :with_raw => true)
+    puts "yo"
+    puts client.access_token
+    user = client.get_users(:access_token =>  client.access_token).data.first
     @profile_data = { :image => user.profile_image_url, :name => user.display_name, :twitch_id => user.id }
     if User.find_by(@profile_data) == nil
       @profile = User.new(@profile_data)
