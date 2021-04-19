@@ -14,13 +14,10 @@ class SessionsController < ApplicationController
     :code => session_code, :grant_type => "client_credentials", :redirect_uri => "http://localhost:3000" })
     access_token = JSON.parse(response)["access_token"]
     session[:token] = access_token
-
-    client = Twitch::Client.new( client_id: "#{ENV["id"]}",
-    client_secret: "#{ENV["secret"]}",
-    token_type: :user, :access_token => session[:token], :with_raw => true)
+    client = Twitch::Client.new(:client_id => "#{ENV["id"]}",:client_secret => "#{ENV["secret"]}",token_type: :user, access_token: access_token)
     puts "yo"
     puts client.access_token
-    user = client.get_users(:access_token =>  client.access_token).data.first
+    user = client.get_users({oauth_token: client.access_token}).data.first
     @profile_data = { :image => user.profile_image_url, :name => user.display_name, :twitch_id => user.id }
     if User.find_by(@profile_data) == nil
       @profile = User.new(@profile_data)
@@ -33,7 +30,5 @@ class SessionsController < ApplicationController
 
 
   private
- def random_password
-  (0...8).map{(65 + rand(26)).chr}.join
- end
+
 end
