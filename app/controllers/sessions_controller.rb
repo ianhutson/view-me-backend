@@ -1,7 +1,8 @@
-require "rest-client"
-require "json"
 require "twitch-api"
-
+require 'json'
+require 'uri'
+require 'net/http'
+require 'httplog'
 class SessionsController < ApplicationController
 
   def new
@@ -10,20 +11,32 @@ class SessionsController < ApplicationController
   
   def create
     session_code = params[:code]
-    response = RestClient.post("https://id.twitch.tv/oauth2/token", { :client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}",
-    :code => session_code, :grant_type => "client_credentials", :redirect_uri => "http://localhost:3000" })
-    access_token = JSON.parse(response)["access_token"]
+    url = "https://id.twitch.tv/oauth2/token?"
+    extras = "client_id="+"#{ENV["id"]}"+"&client_secret="+"#{ENV["secret"]}"+"&code="+"#{session_code}"+"&grant_type=authorization_code&redirect_uri=http://localhost:3000"
+    headers = {
+      :client_id => "#{ENV["id"]}",
+      :client_secret => "#{ENV["secret"]}",
+      :code => "#{session_code}",
+      :grant_type => "authorization_code",
+      :redirect_uri => "http://localhost:3001/auth/twitch/callback"
+    }
+    uri = URI.parse(url)
+    response = Net::HTTP::post_form(uri, headers)
+    access_token = JSON.parse(response.body)["access_token"]
     session[:token] = access_token
-    client = Twitch::Client.new(:client_id => "#{ENV["id"]}",:client_secret => "#{ENV["secret"]}",token_type: :user, access_token: access_token)
+    client = Twitch::Client.new(:client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}", token_type: :user, redirect_uri: "http://localhost:3001/auth/twitch/callback", :access_token => session[:token], :with_raw => true)
+    user = client.get_users({access_token: session[:token]}).data.first
     puts "yo"
-    puts client.access_token
-    user = client.get_users({oauth_token: client.access_token}).data.first
-    @profile_data = { :image => user.profile_image_url, :name => user.display_name, :twitch_id => user.id }
+    data = user
+    puts data
+    @profile_data = { :image => data.profile_image_url, :name => data.login, :twitch_id => data.id }
     if User.find_by(@profile_data) == nil
       @profile = User.new(@profile_data)
       @profile.save
+      redirect_to "http://localhost:3000"
     else
       @profile = User.find_by(@profile_data)
+      redirect_to "http://localhost:3000"
     end
     @profile_data = session[:profile_data] 
   end
