@@ -26,17 +26,15 @@ class SessionsController < ApplicationController
     session[:token] = access_token
     client = Twitch::Client.new(:client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}", token_type: :user, redirect_uri: "http://localhost:3001/auth/twitch/callback", :access_token => session[:token], :with_raw => true)
     user = client.get_users({access_token: session[:token]}).data.first
-    puts "yo"
     data = user
-    puts data
     @profile_data = { :image => data.profile_image_url, :name => data.login, :twitch_id => data.id }
     if User.find_by(@profile_data) == nil
       @profile = User.new(@profile_data)
       @profile.save
-      redirect_to generate_url("http://localhost:3000", :name => data.login) 
+      redirect_to generate_url("http://localhost:3000", :id => data.id) 
     else
       @profile = User.find_by(@profile_data)
-      redirect_to generate_url("http://localhost:3000", :name => data.login) 
+      redirect_to generate_url("http://localhost:3000", :code => data.id) 
     end
     @profile_data = session[:profile_data] 
   end
