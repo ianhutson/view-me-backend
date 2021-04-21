@@ -33,15 +33,19 @@ class SessionsController < ApplicationController
     if User.find_by(@profile_data) == nil
       @profile = User.new(@profile_data)
       @profile.save
-      redirect_to "http://localhost:3000"
+      redirect_to generate_url("http://localhost:3000", :name => data.login) 
     else
       @profile = User.find_by(@profile_data)
-      redirect_to "http://localhost:3000"
+      redirect_to generate_url("http://localhost:3000", :name => data.login) 
     end
     @profile_data = session[:profile_data] 
   end
 
 
   private
-
+  def generate_url(url, params = {})
+    uri = URI(url)
+    uri.query = params.to_query
+    uri.to_s
+  end
 end
