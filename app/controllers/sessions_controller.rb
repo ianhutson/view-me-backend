@@ -41,7 +41,7 @@ class SessionsController < ApplicationController
 
 
   private
-  # xd
+
   def generate_url(url, params = {})
     uri = URI(url)
     uri.query = params.to_query
