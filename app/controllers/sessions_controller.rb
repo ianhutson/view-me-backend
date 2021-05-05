@@ -26,13 +26,19 @@ class SessionsController < ApplicationController
     puts "yo"
     puts data.methods
     @profile_data = { :image => data.profile_image_url, :name => data.display_name, :twitch_id => data.id}
-    @user = User.find_by(name: @profile_data[:name])
+    @user = User.find_or_create_by(name: @profile_data[:name], image: @profile_data[:image], twitch_id: @profile_data[:image])
     if @user
       login!
     render json: {
       logged_in: true,
       user: @profile_data
     }
+    else
+    render json: { 
+      status: 401,
+      errors: ['no such user, please try again']
+    }
+    end
     
     # if User.find_by(@profile_data) == nil
     #   @profile = User.new(@profile_data)
@@ -59,6 +65,6 @@ class SessionsController < ApplicationController
       }
     end
 end
-end
+
 private
 end
