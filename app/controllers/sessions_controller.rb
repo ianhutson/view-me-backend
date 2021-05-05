@@ -5,10 +5,6 @@ require 'net/http'
 require 'httplog'
 class SessionsController < ApplicationController
 
-  def new
-    user = User.new
-  end
-  
   def create
     session_code = params[:code]
     url = "https://id.twitch.tv/oauth2/token?"
@@ -27,24 +23,42 @@ class SessionsController < ApplicationController
     client = Twitch::Client.new(:client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}", token_type: :user, redirect_uri: "http://localhost:3001/auth/twitch/callback", :access_token => session[:token], :with_raw => true)
     user = client.get_users({access_token: session[:token]}).data.first
     data = user
-    @profile_data = { :image => data.profile_image_url, :name => data.login, :twitch_id => data.id }
-    if User.find_by(@profile_data) == nil
-      @profile = User.new(@profile_data)
-      @profile.save
-      redirect_to generate_url("http://localhost:3000", :id => data.id) 
+    puts "yo"
+    puts data.methods
+    @profile_data = { :image => data.profile_image_url, :name => data.display_name, :twitch_id => data.id}
+    @user = User.find_by(name: @profile_data[:name])
+    if @user
+      login!
+    render json: {
+      logged_in: true,
+      user: @profile_data
+    }
+    
+    # if User.find_by(@profile_data) == nil
+    #   @profile = User.new(@profile_data)
+    #   @profile.save
+    #   redirect_to generate_url("http://localhost:3000", :id => data.id) 
+    # else
+    #   @profile = User.find_by(@profile_data)
+    #   redirect_to generate_url("http://localhost:3000", :code => data.id) 
+    # end
+    # @profile_data = session[:profile_data] 
+  end
+
+
+  def is_logged_in?
+    if logged_in? && current_user
+      render json: {
+        logged_in: true,
+        user: current_user
+      }
     else
-      @profile = User.find_by(@profile_data)
-      redirect_to generate_url("http://localhost:3000", :code => data.id) 
+      render json: {
+        logged_in: false,
+        message: 'no such user'
+      }
     end
-    @profile_data = session[:profile_data] 
-  end
-
-
-  private
-
-  def generate_url(url, params = {})
-    uri = URI(url)
-    uri.query = params.to_query
-    uri.to_s
-  end
+end
+end
+private
 end

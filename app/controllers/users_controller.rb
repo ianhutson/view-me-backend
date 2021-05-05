@@ -23,6 +23,6 @@ class UsersController < ApplicationController
 
 
     def user_params
-      params.require(:user).permit(:name, :image, :twitch_id)
+      params.require(:user).permit(:name, :image, :twitch_id, :email)
     end
 end
