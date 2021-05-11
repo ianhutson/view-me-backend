@@ -29,26 +29,20 @@ class SessionsController < ApplicationController
     @user = User.find_or_create_by(name: @profile_data[:name], image: @profile_data[:image], twitch_id: @profile_data[:image])
     if @user
       login!
-    render json: {
-      logged_in: true,
-      user: @profile_data
-    }
+      cookies[logged_in: true,
+      user: current_user
+    ]
+    redirect_to "http://localhost:3000/"
     else
     render json: { 
       status: 401,
       errors: ['no such user, please try again']
     }
     end
-    
-    # if User.find_by(@profile_data) == nil
-    #   @profile = User.new(@profile_data)
-    #   @profile.save
-    #   redirect_to generate_url("http://localhost:3000", :id => data.id) 
-    # else
-    #   @profile = User.find_by(@profile_data)
-    #   redirect_to generate_url("http://localhost:3000", :code => data.id) 
-    # end
-    # @profile_data = session[:profile_data] 
+  end
+  
+  def show
+    render json: {user: current_user}
   end
 
 
