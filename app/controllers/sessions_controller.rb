@@ -32,7 +32,7 @@ class SessionsController < ApplicationController
       cookies[logged_in: true,
       user: current_user
     ]
-    redirect_to "http://localhost:3000/"
+    redirect_to generate_url("http://localhost:3000/")
     else
     render json: { 
       status: 401,
@@ -41,10 +41,11 @@ class SessionsController < ApplicationController
     end
   end
   
-  def show
-    render json: {user: current_user}
+  def generate_url(url, params = {})
+    uri = URI(url)
+    uri.query = params.to_query
+    uri.to_s
   end
-
 
   def is_logged_in?
     if logged_in? && current_user
