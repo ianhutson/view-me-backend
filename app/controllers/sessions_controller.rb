@@ -23,8 +23,6 @@ class SessionsController < ApplicationController
     client = Twitch::Client.new(:client_id => "#{ENV["id"]}", :client_secret => "#{ENV["secret"]}", token_type: :user, redirect_uri: "http://localhost:3001/auth/twitch/callback", :access_token => session[:token], :with_raw => true)
     user = client.get_users({access_token: session[:token]}).data.first
     data = user
-    puts "yo"
-    puts data.methods
     @profile_data = { :image => data.profile_image_url, :name => data.display_name, :twitch_id => data.id}
     @user = User.find_or_create_by(name: @profile_data[:name], image: @profile_data[:image], twitch_id: @profile_data[:image])
     if @user
@@ -32,19 +30,13 @@ class SessionsController < ApplicationController
       cookies[logged_in: true,
       user: current_user
     ]
-    redirect_to generate_url("http://localhost:3000/")
+    redirect_to "http://localhost:3000/"
     else
     render json: { 
       status: 401,
       errors: ['no such user, please try again']
     }
     end
-  end
-  
-  def generate_url(url, params = {})
-    uri = URI(url)
-    uri.query = params.to_query
-    uri.to_s
   end
 
   def is_logged_in?

@@ -23,6 +23,7 @@ gem "dotenv-rails"
 gem 'securerandom'
 gem "rest-client"
 gem "paypal-sdk-rest"
+gem "devise"
 gem "haml"
 gem "jquery-rails"
 gem "money-rails"
